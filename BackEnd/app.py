@@ -305,6 +305,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, roc_auc_score, f1_score
 from models import PLS, DeepPLS
 from coral import CORAL
+from tca import TCA
+from jda import JDA
 
 app = Flask(__name__)
 CORS(app)
@@ -354,7 +356,7 @@ def process_files(request):
 @app.route('/upload', methods=['POST'])
 def upload_files():
     model_type = request.form.get('model_type')
-    if model_type not in ['pls', 'dpls', 'gdpls', 'coral']:
+    if model_type not in ['pls', 'dpls', 'gdpls', 'coral','tca','jda']:
         return jsonify({'error': 'Invalid model type'}), 400
 
     source_data, source_label, target_data, target_label, target_data_df, error = process_files(request)
@@ -460,6 +462,48 @@ def upload_files():
         target_data_with_labels['Predicted Label'] = ypre
         target_data_with_labels['Defect or Not'] = np.where(target_data_with_labels.iloc[:, -2] == ypre, 'Correct', 'Incorrect')
         target_data_with_labels_dict = target_data_with_labels.to_dict(orient='records')
+
+
+
+    elif model_type == 'tca':
+        print('a1a1a1')
+        source_file = request.files['source']
+        target_file = request.files['target']
+        source_data_df1 = pd.read_excel(source_file)
+        target_data_df1 = pd.read_excel(target_file)
+        # Split features and labels
+        Xs = source_data_df1.iloc[:, :-1].values  # Source features
+        Ys = source_data_df1.iloc[:, -1].values   # Source labels
+        Xt = target_data_df1.iloc[:, :-1].values  # Target features
+        Yt = target_data_df1.iloc[:, -1].values   # Target labels
+        model = TCA(kernel_type='linear', dim=30, lamb=1, gamma=1)
+        accuracy,ypre, auc_roc, f1_score_macro=model.fit_predict(Xs, Ys, Xt, Yt)
+        target_data_with_labels = target_data_df1.copy()
+        target_data_with_labels['Predicted Label'] = ypre
+        target_data_with_labels['Defect or Not'] = np.where(target_data_with_labels.iloc[:, -2] == ypre, 'Correct', 'Incorrect')
+        target_data_with_labels_dict = target_data_with_labels.to_dict(orient='records')
+
+
+
+    elif model_type == 'jda':
+        print('jdaaaa')
+        source_file = request.files['source']
+        target_file = request.files['target']
+        source_data_df1 = pd.read_excel(source_file)
+        target_data_df1 = pd.read_excel(target_file)
+        # Split features and labels
+        Xs = source_data_df1.iloc[:, :-1].values  # Source features
+        Ys = source_data_df1.iloc[:, -1].values   # Source labels
+        Xt = target_data_df1.iloc[:, :-1].values  # Target features
+        Yt = target_data_df1.iloc[:, -1].values   # Target labels
+        model = JDA(kernel_type='primal', dim=30, lamb=1, gamma=1)
+        accuracy,ypre, auc_roc, f1_score_macro=model.fit_predict(Xs, Ys, Xt, Yt)
+        target_data_with_labels = target_data_df1.copy()
+        target_data_with_labels['Predicted Label'] = ypre
+        target_data_with_labels['Defect or Not'] = np.where(target_data_with_labels.iloc[:, -2] == ypre, 'Correct', 'Incorrect')
+        target_data_with_labels_dict = target_data_with_labels.to_dict(orient='records')
+
+
 
 
 
