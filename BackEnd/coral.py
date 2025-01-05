@@ -44,25 +44,3 @@ class CORAL:
         return acc, y_pred , auc_roc , f1
 
 
-# if __name__ == '__main__':
-#     # Load data from Excel files
-#     src_file = 'PC3.xlsx'
-#     tar_file = 'PC4.xlsx'
-
-#     # Assuming the Excel files have features in columns and the last column contains labels
-#     src_data = pd.read_excel(src_file)
-#     tar_data = pd.read_excel(tar_file)
-
-#     # Split features and labels
-#     Xs = src_data.iloc[:, :-1].values  # Source features
-#     Ys = src_data.iloc[:, -1].values   # Source labels
-
-#     Xt = tar_data.iloc[:, :-1].values  # Target features
-#     Yt = tar_data.iloc[:, -1].values   # Target labels
-
-#     coral = CORAL()
-#     acc, ypre = coral.fit_predict(Xs, Ys, Xt, Yt)
-#     print(f'Accuracy: {acc}')
-
-
-#correct

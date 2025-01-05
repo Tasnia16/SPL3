@@ -1,6 +1,63 @@
+import numpy as np
 from sklearn.kernel_approximation import Nystroem
+from sklearn.neighbors import NearestNeighbors
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, roc_auc_score, f1_score
 import torch as th
 from utils import _get_first_singular_vectors_power_method, _get_first_singular_vectors_svd, _svd_flip_1d
+
+
+
+def compute_laplacian(X, k=5):
+    """Compute the Laplacian matrix for input data X."""
+    nbrs = NearestNeighbors(n_neighbors=k).fit(X)
+    W = np.zeros((X.shape[0], X.shape[0]))
+    distances, indices = nbrs.kneighbors(X)
+    for i in range(X.shape[0]):
+        for j in indices[i]:
+            W[i, j] = 1
+            W[j, i] = 1  # Symmetric connection
+
+    # Degree matrix D (diagonal)
+    D = np.diag(W.sum(axis=1))
+
+    # Laplacian matrix L = D - W
+    L = D - W
+    return th.tensor(L, dtype=th.float64)
+
+
+def compute_weighting_matrix(X, k=5):
+    """Compute the weighting matrix W using k-nearest neighbors for data X."""
+    nbrs = NearestNeighbors(n_neighbors=k).fit(X)
+    W = np.zeros((X.shape[0], X.shape[0]))
+    distances, indices = nbrs.kneighbors(X)
+    for i in range(X.shape[0]):
+        for j in indices[i]:
+            W[i, j] = 1
+            W[j, i] = 1  # Symmetric connection
+    return W  
+
+
+class Accuracy:
+    
+    @staticmethod
+    def knn_accuracy(train_data, train_labels, test_data, test_labels):
+        num_classes = len(np.unique(train_labels))
+        knn = KNeighborsClassifier(n_neighbors=num_classes)
+        knn.fit(train_data, train_labels)
+        predicted_labels = knn.predict(test_data)
+        accuracy = accuracy_score(test_labels, predicted_labels)
+        return accuracy, predicted_labels
+
+    @staticmethod
+    def roc_auc_f1(train_data, train_labels, test_data, test_labels):
+        knn = KNeighborsClassifier(n_neighbors=1)
+        knn.fit(train_data, train_labels)
+        predicted_labels = knn.predict(test_data)
+        roc_auc = roc_auc_score(test_labels, predicted_labels, multi_class='ovr')
+        f1 = f1_score(test_labels, predicted_labels, average='weighted')
+        return roc_auc, f1
+    
 
 class PLS(object):
     def __init__(self, n_components, solver, max_iter=500, tol=1e-06):
@@ -134,12 +191,46 @@ class DeepPLS(object):
                 print('b',Y.shape)
                 if self.stack_previous_lv1 and layer_index > 0:
                     lv1_previous_layer = X_backup[:, [0]]
-                    X = th.hstack((lv1_previous_layer, X))
-            print('a2',X.shape)  
-            print('b2',Y.shape)
+                    X = th.hstack((lv1_previous_layer, X))     #normal
+                    
+                    # NEW  laplacian 1
+                    # L_x = compute_laplacian(X_backup.numpy(), k=5)
+                    # L_x = L_x.float()
+                    # lambda_ = 1  # Regularization strength
+                    # lv1_regularized = th.matmul(L_x, lv1_previous_layer)
+                    # # lv1_regularized = lv1_previous_layer - lambda_ * th.matmul(L_x, lv1_previous_layer)
+                    # X = th.hstack((lv1_regularized, X))
+
+
+                    # # NEW  laplacian 1
+                    # L_lv = compute_laplacian(lv1_previous_layer.numpy(), k=5)
+                    # L_lv = L_lv.float()
+                    # lambda_ = 1  # Regularization strength
+                    # lv1_regularized = lv1_previous_layer - lambda_ * ((th.matmul(lv1_previous_layer.T, L_lv)).T)
+                    # X = th.hstack((lv1_regularized, X))
+                    
+                     # NEW  laplacian 3
+                    # L_lv = compute_laplacian(lv1_previous_layer.numpy(), k=5)
+                    # L_lv = L_lv.float()
+                    # lv1_regularized = th.matmul(L_lv, lv1_previous_layer)
+                    # X = th.hstack((lv1_regularized, X))
+
+
+                    #  # NEW  laplacian 2
+                    # L_lv = compute_laplacian(lv1_previous_layer.numpy(), k=5)
+                    # L_lv = L_lv.float()
+                    # lambda_ = 0.6  # Regularization strength
+                    # lv1_regularized = lv1_previous_layer - lambda_ * th.matmul(L_lv, lv1_previous_layer)
+                    # X = th.hstack((lv1_regularized, X))
+
+
+
+
+            # print('a2',X.shape)  
+            # print('b2',Y.shape)
             pls = PLS(n_components=self.lv_dimensions[layer_index], solver=self.pls_solver)
-            print('a3',X.shape)
-            print('y', Y.shape)
+            # print('a3',X.shape)
+            # print('y', Y.shape)
             pls.fit(X, Y)
             
             self.pls_funcs.append(pls)
