@@ -315,6 +315,7 @@ from jda import JDA
 from bda import BDA
 from tcaP import TCA_PLUS
 from deepCoral import DeepCoralModel
+from dtlc import DTLC
 
 app = Flask(__name__)
 CORS(app)
@@ -456,7 +457,7 @@ def process_files1(request):
 @app.route('/upload', methods=['POST'])
 def upload_files():
     model_type = request.form.get('model_type')
-    if model_type not in ['pls', 'dpls', 'gdpls', 'coral','tca','jda', 'bda', 'tcaPlus', 'deepCoral']:
+    if model_type not in ['pls', 'dpls', 'gdpls', 'coral','tca','jda', 'bda', 'tcaPlus', 'deepCoral', 'dtlc']:
         return jsonify({'error': 'Invalid model type'}), 400
 
     source_data, source_label, target_data, target_label, target_data_df, error = process_files(request)
@@ -489,7 +490,7 @@ def upload_files():
         auc_roc, f1_score_macro = Accuracy.roc_auc_f1(transformed_source_data_np, source_label_np, transformed_target_data_np, target_label_np)
         target_data_with_labels = target_data_df.copy()
         target_data_with_labels['Predicted Label'] = predicted_labels
-        target_data_with_labels['Defect or Not'] = np.where(target_data_with_labels.iloc[:, -2] == predicted_labels, 'Correct', 'Incorrect')
+        target_data_with_labels['Correct or Not'] = np.where(target_data_with_labels.iloc[:, -2] == predicted_labels, 'Correct', 'Incorrect')
 
         target_data_with_labels_dict = target_data_with_labels.to_dict(orient='records')
 
@@ -518,7 +519,7 @@ def upload_files():
         auc_roc, f1_score_macro = Accuracy.roc_auc_f1(transformed_source_data_np, source_label_np, transformed_target_data_np, target_label_np)
         target_data_with_labels = target_data_df.copy()
         target_data_with_labels['Predicted Label'] = predicted_labels
-        target_data_with_labels['Defect or Not'] = np.where(target_data_with_labels.iloc[:, -2] == predicted_labels, 'Correct', 'Incorrect')
+        target_data_with_labels['Correct or Not'] = np.where(target_data_with_labels.iloc[:, -2] == predicted_labels, 'Correct', 'Incorrect')
 
         target_data_with_labels_dict = target_data_with_labels.to_dict(orient='records')
 
@@ -546,7 +547,7 @@ def upload_files():
         auc_roc, f1_score_macro = Accuracy.roc_auc_f1(transformed_source_data_np, source_label_np, transformed_target_data_np, target_label_np)
         target_data_with_labels = target_data_df.copy()
         target_data_with_labels['Predicted Label'] = predicted_labels
-        target_data_with_labels['Defect or Not'] = np.where(target_data_with_labels.iloc[:, -2] == predicted_labels, 'Correct', 'Incorrect')
+        target_data_with_labels['Correct or Not'] = np.where(target_data_with_labels.iloc[:, -2] == predicted_labels, 'Correct', 'Incorrect')
         target_data_with_labels_dict = target_data_with_labels.to_dict(orient='records')
 
     elif model_type == 'coral':
@@ -559,7 +560,7 @@ def upload_files():
         accuracy,ypre, auc_roc, f1_score_macro=model.fit_predict(source_data1,source_label1,target_data1,target_label1)
         target_data_with_labels = target_data_df1.copy()
         target_data_with_labels['Predicted Label'] = ypre
-        target_data_with_labels['Defect or Not'] = np.where(target_data_with_labels.iloc[:, -2] == ypre, 'Correct', 'Incorrect')
+        target_data_with_labels['Correct or Not'] = np.where(target_data_with_labels.iloc[:, -2] == ypre, 'Correct', 'Incorrect')
         target_data_with_labels_dict = target_data_with_labels.to_dict(orient='records')
 
     elif model_type == 'deepCoral':
@@ -567,7 +568,7 @@ def upload_files():
          accuracy, ypre, auc_roc, f1_score_macro = model.fit_predict(source_data1, source_label1, target_data1, target_label1)
          target_data_with_labels = target_data_df1.copy()
          target_data_with_labels['Predicted Label'] = ypre
-         target_data_with_labels['Defect or Not'] = np.where(target_data_with_labels.iloc[:, -2] == ypre, 'Correct', 'Incorrect')
+         target_data_with_labels['Correct or Not'] = np.where(target_data_with_labels.iloc[:, -2] == ypre, 'Correct', 'Incorrect')
          target_data_with_labels_dict = target_data_with_labels.to_dict(orient='records')    
          
 
@@ -576,7 +577,7 @@ def upload_files():
         accuracy,ypre, auc_roc, f1_score_macro=model.fit_predict(source_data1,source_label1,target_data1,target_label1)
         target_data_with_labels = target_data_df1.copy()
         target_data_with_labels['Predicted Label'] = ypre
-        target_data_with_labels['Defect or Not'] = np.where(target_data_with_labels.iloc[:, -2] == ypre, 'Correct', 'Incorrect')
+        target_data_with_labels['Correct or Not'] = np.where(target_data_with_labels.iloc[:, -2] == ypre, 'Correct', 'Incorrect')
         target_data_with_labels_dict = target_data_with_labels.to_dict(orient='records')
 
     
@@ -592,7 +593,7 @@ def upload_files():
         accuracy,ypre, auc_roc, f1_score_macro=model.fit_predict(Xs_norm, source_label1, Xt_norm, target_label1)
         target_data_with_labels = target_data_df1.copy()
         target_data_with_labels['Predicted Label'] = ypre
-        target_data_with_labels['Defect or Not'] = np.where(target_data_with_labels.iloc[:, -2] == ypre, 'Correct', 'Incorrect')
+        target_data_with_labels['Correct or Not'] = np.where(target_data_with_labels.iloc[:, -2] == ypre, 'Correct', 'Incorrect')
         target_data_with_labels_dict = target_data_with_labels.to_dict(orient='records')
 
     elif model_type == 'jda':
@@ -600,7 +601,7 @@ def upload_files():
         accuracy,ypre, auc_roc, f1_score_macro=model.fit_predict(source_data1,source_label1,target_data1,target_label1)
         target_data_with_labels = target_data_df1.copy()
         target_data_with_labels['Predicted Label'] = ypre
-        target_data_with_labels['Defect or Not'] = np.where(target_data_with_labels.iloc[:, -2] == ypre, 'Correct', 'Incorrect')
+        target_data_with_labels['Correct or Not'] = np.where(target_data_with_labels.iloc[:, -2] == ypre, 'Correct', 'Incorrect')
         target_data_with_labels_dict = target_data_with_labels.to_dict(orient='records')
 
 
@@ -609,13 +610,33 @@ def upload_files():
         accuracy,ypre, auc_roc, f1_score_macro=model.fit_predict(source_data1,source_label1,target_data1,target_label1)
         target_data_with_labels = target_data_df1.copy()
         target_data_with_labels['Predicted Label'] = ypre
-        target_data_with_labels['Defect or Not'] = np.where(target_data_with_labels.iloc[:, -2] == ypre, 'Correct', 'Incorrect')
+        target_data_with_labels['Correct or Not'] = np.where(target_data_with_labels.iloc[:, -2] == ypre, 'Correct', 'Incorrect')
         target_data_with_labels_dict = target_data_with_labels.to_dict(orient='records')    
 
+
+
+     # In app.py:
+    elif model_type == 'dtlc':
+        model = DTLC(dim=30, max_iter=10, alpha=1.0, beta=1.0, eta=1.0)
+        accuracy, ypre, auc_roc, f1_score_macro = model.fit_predict(
+            source_data1, 
+            source_label1,
+            target_data1,
+            target_label1
+        )
+        target_data_with_labels = target_data_df1.copy()
+        target_data_with_labels['Predicted Label'] = ypre
+        target_data_with_labels['Correct or Not'] = np.where(
+            target_data_with_labels.iloc[:, -2] == ypre, 
+            'Correct', 
+            'Incorrect'
+        )
+        target_data_with_labels_dict = target_data_with_labels.to_dict(orient='records')   
+
     return jsonify({
-        'accuracy': accuracy,
-        'aucRoc': auc_roc,
-        'f1Score': f1_score_macro,
+        'accuracy': f"{accuracy * 100:.2f}%",
+        'aucRoc': f"{auc_roc:.3f}",
+        'f1Score': f"{f1_score_macro:.3f}",
         'targetDataWithLabels': target_data_with_labels_dict
     })
 

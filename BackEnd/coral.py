@@ -40,7 +40,8 @@ class CORAL:
         y_pred = clf.predict(Xt)
         acc = sklearn.metrics.accuracy_score(Yt, y_pred)
         auc_roc = roc_auc_score(Yt, y_pred, multi_class='ovr')
-        f1 = f1_score(Yt, y_pred, labels=None, pos_label=1, average='binary', sample_weight=None, zero_division='warn')
+        f1 = f1_score(Yt, y_pred, average='weighted')
+        # f1 = f1_score(Yt, y_pred, labels=None, pos_label=1, average='binary', sample_weight=None, zero_division='warn')
         return acc, y_pred , auc_roc , f1
 
 

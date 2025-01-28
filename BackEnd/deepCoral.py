@@ -153,6 +153,6 @@ class DeepCoralModel:
         # Final evaluation with best predictions
         accuracy = accuracy_score(Yt_numpy, best_pred)
         auc_roc = roc_auc_score(Yt_numpy, best_pred, multi_class='ovr')
-        f1 = f1_score(Yt_numpy, best_pred, average='binary')
-        
+        # f1 = f1_score(Yt_numpy, best_pred, average='binary')
+        f1 = f1_score(Yt_numpy, best_pred,labels=None, pos_label=1, average='weighted',sample_weight=None)
         return accuracy, best_pred, auc_roc, f1

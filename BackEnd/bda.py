@@ -168,7 +168,8 @@ class BDA:
             # print('{} iteration [{}/{}]: Acc: {:.4f}'.format(self.mode, t + 1, self.T, acc))
 
         auc_roc = roc_auc_score(Yt, Y_tar_pseudo, multi_class='ovr')
-        f1 = f1_score(Yt, Y_tar_pseudo, labels=None, pos_label=1, average='binary', sample_weight=None, zero_division='warn')
+        f1 = f1_score(Yt, Y_tar_pseudo, average='weighted')
+        # f1 = f1_score(Yt, Y_tar_pseudo, labels=None, pos_label=1, average='binary', sample_weight=None, zero_division='warn')
         return acc, Y_tar_pseudo , auc_roc , f1
 
 
